@@ -1,0 +1,38 @@
+{
+  "name": "api-rest-crud",
+  "version": "1.0.0",
+  "description": "api for create, read, update and delete users from a database (MongoDB)",
+  "main": "index.js",
+  "scripts": {
+    "start": "node ./src/index.js",
+    "dev": "node --watch ./src/index.js"
+  },
+  "keywords": [
+    "api",
+    "rest",
+    "express",
+    "node",
+    "crud",
+    "mongodb"
+  ],
+  "author": "ronaldsrdev",
+  "license": "MIT",
+  "dependencies": {
+    "dotenv": "16.4.5",
+    "express": "4.19.2",
+    "mongoose": "8.4.1",
+    "morgan": "^1.10.0"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.4.0",
+    "eslint": "^9.4.0",
+    "globals": "^15.4.0",
+    "prettier": "3.3.1",
+    "standard": "^17.1.0"
+  },
+  "eslintConfig": {
+    "extends": [
+      "standard"
+    ]
+  }
+}
