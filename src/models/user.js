@@ -13,11 +13,24 @@ const userSchema = mongoose.Schema({
         type: String,
         required: true,
     },
+    money: {
+        type: Number,
+        required: false,
+        default: 0,
+        integer: true,
+        min: 0,
+        max: 1000000,
+    },
     age: {
         type: String,
         required: true,
         min: 18,
         max: 100,
+    },
+    createdAt: {
+        type: String,
+        required: true,
+        default: Date().toLocaleString('es-ES'),
     },
 })
 

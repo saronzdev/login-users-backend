@@ -21,7 +21,8 @@ app.use((req, res, next) => {
             next()
         })
         .catch((err) => {
-            console.log('Error: ', err) //developer feature
+            console.log('Error: ', err)
+            res.end('Database Error' + err) //developer feature
         })
 })
 
