@@ -1,155 +1,60 @@
 const express = require('express')
-const userSchema = require('../models/user.js')
-
-let login = false
-let idLogin = ''
+const modul = require('./modules/users_modules.js')
+const fs = require('node:fs/promises')
 
 const router = express.Router()
 
 router.post('/users', (req, res) => {
-  const user = userSchema(req.body)
-  user
-    .save()
-    .then(() => res.status(201).json({message: 'Created Successfully'}))
-    .catch((err) => {
-      res.status(500).json({
-        message: 'API error creating user',
-        error: err,
-      })
-    })
+	modul.createUser(req, res)
 })
 
 router.get('/users/login', (req, res) => {
-  login = false
-  const {userOrEmail, password} = req.body
-  userSchema
-    .find()
-    .then((data) => {
-      data.forEach((element) => {
-        if (
-          (element.user === userOrEmail || element.email === userOrEmail) &&
-          element.password === password
-        ) {
-          login = true
-          idLogin = element._id
-          return
-        }
-      })
-      login
-        ? res.json({message: 'Loggin Successfully'})
-        : res.json({message: 'Invalid Credentials'})
-    })
-    .catch((err) => {
-      res.status(500).json({
-        message: 'API error in login',
-        error: err,
-      })
-    })
+	modul.login(req, res)
 })
 
-router.use((req, res, next) => {
-  if (login) {
-    next()
-  } else {
-    res.json({message: 'Login Required'})
-  }
+router.use('/users/:id', (req, res, next) => {
+	const {id} = req.params
+	try {
+		fs.readFile('cookies.cook', 'utf-8')
+			.then((data) => {
+				if (data) {
+					const dataObject = JSON.parse(data)
+					if (id === dataObject.id) {
+						next()
+						console.log('pase')
+					} else {
+						res.status(401).json({message: 'Unauthorized'})
+					}
+				} else {
+					res.json({message: 'Login Needed'})
+				}
+			})
+			.catch((err) => res.json({error: err}))
+	} catch (err) {
+		res.json({message: 'Login Needed', error: err})
+	}
 })
 
 router.get('/users/:id', (req, res) => {
-  const {id} = req.params
-  if (id === idLogin) {
-    userSchema
-      .findById(id)
-      .then((data) => {
-        if (data) {
-          res.json(data)
-        } else {
-          res.status(404).json({message: 'User not found'})
-        }
-      })
-      .catch((err) =>
-        res
-          .status(500)
-          .json({message: 'API error retrieving the user', err: err}),
-      )
-  } else {
-    res.json({message: 'Unauthorized'})
-  }
+	modul.getUsersById(req, res)
 })
 
 router.put('/users/:id', (req, res) => {
-  const {id} = req.params
-  const {user, password, email, age} = req.body
-  if (id === idLogin) {
-    userSchema
-      .updateOne(
-        {_id: id},
-        {
-          $set: {
-            user,
-            email,
-            password,
-            //money
-            age,
-          },
-        },
-      )
-      .then(() => {
-        res.status(204).end()
-      })
-      .catch((err) => {
-        res.status(404).json({message: 'User Not Found', err: err})
-      })
-  } else {
-    res.json({message: 'Unauthorized'})
-  }
+	modul.updateUser(req, res)
 })
 
 //Delete a user
 router.delete('/users/:id', (req, res) => {
-  const {id} = req.params
-  if (id === idLogin) {
-    userSchema
-      .deleteOne({_id: id})
-      .then(() => res.status(200).json({message: 'Deleted Successfully'}))
-      .catch((err) =>
-        res.status(404).json({message: 'User Not Found', err: err}),
-      )
-  } else {
-    res.json({message: 'Unauthorized'})
-  }
+	modul.deleteUser(req, res)
 })
 
-router.use((req, res, next) => {
-  const {user, password} = req.query
-  userSchema
-    .findById('666be70d8cb4459bd3fc117e')
-    .then((data) => {
-      if (data) {
-        if (user === data.user && password === data.password) {
-          next()
-        } else {
-          res.json({
-            message: 'Your`e not a Super User',
-          })
-        }
-      }
-    })
-    .catch((err) =>
-      res.json({message: 'Error with super user auth', error: err}),
-    )
-})
+//Admin Actions
+//router.use((req, res, next) => {
+//su ? next() : res.status(401).json({message: 'Unauthorized'})
+//})
 
 router.get('/users', (req, res) => {
-  userSchema
-    .find()
-    .then((data) => res.json(data))
-    .catch((err) => {
-      res.status(500).json({
-        message: 'API error retrieving users',
-        error: err,
-      })
-    })
+	modul.getUsers(req, res)
 })
 
 module.exports = router
